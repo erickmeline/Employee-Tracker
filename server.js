@@ -1,5 +1,6 @@
 const mysql = require('mysql');
 const inquirer = require('inquirer');
+const badge = require('badge.js');
 
 const connection = mysql.createConnection({
     host: 'localhost',
