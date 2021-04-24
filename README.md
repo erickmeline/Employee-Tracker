@@ -30,4 +30,4 @@ node server.js
 
 ## Screenshot
 
-![screen shot](./public/assets/images/screenshot.png)
+![screen shot](./assets/images/screenshot.png)
