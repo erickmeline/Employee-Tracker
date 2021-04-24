@@ -88,6 +88,7 @@ const roleMenu = () => {
                 'View All Roles',
                 'Add New Role',
                 'Modify/Delete Role',
+                'Direct Reports',
                 'Main Menu'
             ]
         }
@@ -101,6 +102,9 @@ const roleMenu = () => {
             break
             case 'Modify/Delete Role':
                 modDel('role');
+            break;
+            case 'Direct Reports':
+                directReports();
             break;
             default:
                 mainMenu();
@@ -117,8 +121,8 @@ const employeeMenu = () => {
             choices: [
                 'View All Employees',
                 'Add New Employee',
-                'Modify Employee',
-                'Delete Employee',
+                'Modify/Delete Employee',
+                'Reporting To',
                 'Main Menu'
             ]
         }
@@ -132,6 +136,9 @@ const employeeMenu = () => {
             break
             case 'Modify/Delete Employee':
                 modDel('employee');
+            break;
+            case 'Reporting To':
+                reportsTo();
             break;
             default:
                 mainMenu();
@@ -151,6 +158,16 @@ const addNew = (identifier) => {
 
 const modDel = (identifier) => {
     console.log('called modDel with',identifier);
+    mainMenu();
+}
+
+const directReports = () => {
+    console.log('called directReports');
+    mainMenu();
+}
+
+const reportsTo = () => {
+    console.log('called reportsTo');
     mainMenu();
 }
 
