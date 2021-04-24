@@ -26,7 +26,7 @@ node server.js
 
 ## Video Walkthrough
 
-
+coming soon
 
 ## Screenshot
 
