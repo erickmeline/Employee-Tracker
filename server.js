@@ -21,7 +21,7 @@ const mainMenu = () => {
     inquirer.prompt([
         {
             type: 'list',
-            message: '===========[ Main Menu ]==========',
+            message: '\n===========[ Main Menu ]==========\n',
             name: 'option',
             choices: [
                 'View/Modify Departments',
@@ -52,7 +52,7 @@ const departmentMenu = () => {
     inquirer.prompt([
         {
             type: 'list',
-            message: '=======[ Departments Menu ]=======',
+            message: '\n=======[ Departments Menu ]=======\n',
             name: 'option',
             choices: [
                 'View All Departments',
@@ -82,7 +82,7 @@ const roleMenu = () => {
     inquirer.prompt([
         {
             type: 'list',
-            message: '==========[ Roles Menu ]==========',
+            message: '\n==========[ Roles Menu ]==========\n',
             name: 'option',
             choices: [
                 'View All Roles',
@@ -116,7 +116,7 @@ const employeeMenu = () => {
     inquirer.prompt([
         {
             type: 'list',
-            message: '=========[ Employee Menu ]========',
+            message: '\n=========[ Employee Menu ]========\n',
             name: 'option',
             choices: [
                 'View All Employees',
@@ -148,12 +148,93 @@ const employeeMenu = () => {
 
 const viewAll = (identifier) => {
     console.log('called viewAll with',identifier);
-    mainMenu();
+    const query = `SELECT * FROM ${identifier}`;
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        if (res.length) {
+            console.log('\n');
+            console.table(res);
+            console.log('\n');
+        }
+        else {
+            console.log(`\nThere are no ${identifier}s to display.\n`);
+        }
+        mainMenu();
+    });
 }
 
 const addNew = (identifier) => {
     console.log('called addNew with',identifier);
-    mainMenu();
+    if (identifier === 'department') {
+        inquirer.prompt([
+            {
+                message: `Name of ${identifier} to add:`,
+                name: 'name'
+            }
+        ]).then((response) => {
+            connection.query(`INSERT INTO ${identifier} SET ?`,
+            {
+                name: response.name
+            }, (err) => {
+                if (err) throw err;
+                viewAll(identifier);
+            });
+        });
+    }
+    else if (identifier === 'role') {
+        inquirer.prompt([
+            {
+                message: `Name of ${identifier} to add:`,
+                name: 'name'
+            },
+            {
+                message: `Salary of this role:`,
+                name: 'salary'
+            },
+            {
+                // type: 'list',
+                message: `Department this role belongs too:`,
+                name: 'department'
+            }
+
+        ]).then((response) => {
+            connection.query(`INSERT INTO ${identifier} SET ?`,
+            {
+                name: response.name
+            }, (err) => {
+                if (err) throw err;
+                mainMenu();
+            });
+        });
+    }
+    else {
+        const roles = viewAll('role');
+        const managers = viewAll('manager');
+
+        // inquirer.prompt([
+        //     {
+        //         message: 'First name of employee to add:',
+        //         name: 'first_name'
+        //     },
+        //     {
+        //         message: 'Last name of employee to add:',
+        //         name: 'last_name'
+        //     },
+        //     {
+        //         type: 'list',
+        //         message: 'Select a role',
+        //         name: 'role'
+        //     },
+        //     {
+        //         type: 'list',
+        //         message: 'Select a manager:',
+        //         name: 'manager'
+        //     }
+        // ]).then((response) => {
+        //     console.log();
+        // });
+    }
+
 }
 
 const modDel = (identifier) => {
