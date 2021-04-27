@@ -26,7 +26,7 @@ node server.js
 
 ## Video Walkthrough
 
-coming soon
+https://erickmeline.github.io/Employee-Tracker/
 
 ## Screenshot
 
