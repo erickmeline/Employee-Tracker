@@ -147,14 +147,12 @@ const employeeMenu = () => {
 }
 
 const viewAll = (identifier) => {
-    console.log('called viewAll with',identifier);
     const query = `SELECT * FROM ${identifier}`;
     connection.query(query, (err, res) => {
         if (err) throw err;
         if (res.length) {
-            console.log('\n');
+            console.log(`All ${identifier}s:`);
             console.table(res);
-            console.log('\n');
         }
         else {
             console.log(`\nThere are no ${identifier}s to display.\n`);
@@ -164,7 +162,6 @@ const viewAll = (identifier) => {
 }
 
 const addNew = (identifier) => {
-    console.log('called addNew with',identifier);
     if (identifier === 'department') {
         inquirer.prompt([
             {
@@ -175,66 +172,115 @@ const addNew = (identifier) => {
             connection.query(`INSERT INTO ${identifier} SET ?`,
             {
                 name: response.name
-            }, (err) => {
+            },
+            (err) => {
                 if (err) throw err;
+                console.log(`\nSucessfully added ${response.name} ${identifier}\n`);
                 viewAll(identifier);
             });
         });
     }
     else if (identifier === 'role') {
-        inquirer.prompt([
-            {
-                message: `Name of ${identifier} to add:`,
-                name: 'name'
-            },
-            {
-                message: `Salary of this role:`,
-                name: 'salary'
-            },
-            {
-                // type: 'list',
-                message: `Department this role belongs too:`,
-                name: 'department'
-            }
+        connection.query(`SELECT * FROM department`, (err, res) => {
+            if (err) throw err;
+            inquirer.prompt([
+                {
+                    message: `Name of ${identifier} to add:`,
+                    name: 'title'
+                },
+                {
+                    message: `Salary of this role:`,
+                    name: 'salary'
+                },
+                {
+                    type: 'list',
+                    message: `Department this role belongs too:`,
+                    name: 'department',
+                    choices: res.map((department) => department.name)
+                }
 
-        ]).then((response) => {
-            connection.query(`INSERT INTO ${identifier} SET ?`,
-            {
-                name: response.name
-            }, (err) => {
+            ]).then((response) => {
+                let departmentId;
+                res.forEach(department => {
+                    if (department.name === response.department) {
+                        departmentId = department.id;
+                    }
+                });
+                connection.query(`INSERT INTO ${identifier} SET ?`,
+                {
+                    title: response.title,
+                    salary: response.salary,
+                    department_id: departmentId
+                },
+                (err) => {
+                    if (err) throw err;
+                    console.log(`\nSucessfully added ${response.title} ${identifier}\n`);
+                    viewAll(identifier);
+                });
+            });
+        })
+    }
+    else {
+        connection.query(`SELECT * FROM role WHERE title = 'manager'`, (err, managers) => {
+            if (err) throw err;
+            connection.query(`SELECT * FROM role`, (err, roles) => {
                 if (err) throw err;
-                mainMenu();
+                const roleChoices = roles.map((role) => role.title);
+                roleChoices.push('Create new');
+                const managerChoices = managers.map((manager) => manager.name);
+                managerChoices.push('Create new');
+                inquirer.prompt([
+                    {
+                        message: 'First name of employee to add:',
+                        name: 'first_name'
+                    },
+                    {
+                        message: 'Last name of employee to add:',
+                        name: 'last_name'
+                    },
+                    // {
+                    //     type: 'list',
+                    //     message: 'Select a role',
+                    //     name: 'role',
+                    //     choices: roles.map((role) => role.title)
+                    // },
+                    // {
+                    //     type: 'list',
+                    //     message: 'Select a manager:',
+                    //     name: 'manager',
+                    //     choices: managerChoices
+                    // }
+                ]).then((response) => {
+                    let managerId, roleId;
+                    // roles.forEach(role => {
+                    //     if (role.title === role.manager) {
+                    //         roleId = role.id;
+                    //     }
+                    // });
+                    // managers.forEach(manager => {
+                    //     if (manager.name === response.manager) {
+                    //         managerId = manager.id;
+                    //     }
+                    // });
+                    if (response.role === 'Create new' || response.manager === 'Create new') {
+                        addNew('role');
+                    }
+                    connection.query(`INSERT INTO ${identifier} SET ?`,
+                    {
+                        first_name: response.first_name,
+                        last_name: response.last_name,
+                        // role: roleId,
+                        // manager: managerId
+                    },
+                    (err) => {
+                        if (err) throw err;
+                        console.log(`\nSucessfully added ${identifier} ${response.first_name} ${response.last_name}\n`);
+                        viewAll(identifier);
+                    });
+                });
             });
         });
     }
-    else {
-        const roles = viewAll('role');
-        const managers = viewAll('manager');
-
-        // inquirer.prompt([
-        //     {
-        //         message: 'First name of employee to add:',
-        //         name: 'first_name'
-        //     },
-        //     {
-        //         message: 'Last name of employee to add:',
-        //         name: 'last_name'
-        //     },
-        //     {
-        //         type: 'list',
-        //         message: 'Select a role',
-        //         name: 'role'
-        //     },
-        //     {
-        //         type: 'list',
-        //         message: 'Select a manager:',
-        //         name: 'manager'
-        //     }
-        // ]).then((response) => {
-        //     console.log();
-        // });
-    }
-
 }
 
 const modDel = (identifier) => {
