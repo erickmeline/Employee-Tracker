@@ -238,18 +238,18 @@ const addNew = (identifier) => {
                         message: 'Last name of employee to add:',
                         name: 'last_name'
                     },
-                    // {
-                    //     type: 'list',
-                    //     message: 'Select a role',
-                    //     name: 'role',
-                    //     choices: roles.map((role) => role.title)
-                    // },
-                    // {
-                    //     type: 'list',
-                    //     message: 'Select a manager:',
-                    //     name: 'manager',
-                    //     choices: managerChoices
-                    // }
+                    {
+                        type: 'list',
+                        message: 'Select a role',
+                        name: 'role',
+                        choices: roleChoices
+                    },
+                    {
+                        type: 'list',
+                        message: 'Select a manager:',
+                        name: 'manager',
+                        choices: managerChoices
+                    }
                 ]).then((response) => {
                     let managerId, roleId;
                     // roles.forEach(role => {
