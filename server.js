@@ -24,22 +24,22 @@ const mainMenu = () => {
             message: '\n===========[ Main Menu ]==========\n',
             name: 'option',
             choices: [
-                'View/Modify Departments',
-                'View/Modify Roles',
-                'View/Modify Employees',
+                'View/Add Departments',
+                'View/Add Roles',
+                'View/Add Employees',
                 'Exit',
             ],
             default: ['Exit']
         }
     ]).then((response) => {
         switch (response.option) {
-            case 'View/Modify Departments':
+            case 'View/Add Departments':
                 departmentMenu();
             break;
-            case 'View/Modify Roles':
+            case 'View/Add Roles':
                 roleMenu();
             break
-            case 'View/Modify Employees':
+            case 'View/Add Employees':
                 employeeMenu();
             break;
             default:
@@ -57,7 +57,6 @@ const departmentMenu = () => {
             choices: [
                 'View All Departments',
                 'Add New Department',
-                'Modify/Delete Department',
                 'Main Menu'
             ]
         }
@@ -68,9 +67,6 @@ const departmentMenu = () => {
             break;
             case 'Add New Department':
                 addNew('department');
-            break
-            case 'Modify/Delete Department':
-                modDel('department');
             break;
             default:
                 mainMenu();
@@ -87,8 +83,6 @@ const roleMenu = () => {
             choices: [
                 'View All Roles',
                 'Add New Role',
-                'Modify/Delete Role',
-                'Direct Reports',
                 'Main Menu'
             ]
         }
@@ -99,12 +93,6 @@ const roleMenu = () => {
             break;
             case 'Add New Role':
                 addNew('role');
-            break
-            case 'Modify/Delete Role':
-                modDel('role');
-            break;
-            case 'Direct Reports':
-                directReports();
             break;
             default:
                 mainMenu();
@@ -121,8 +109,6 @@ const employeeMenu = () => {
             choices: [
                 'View All Employees',
                 'Add New Employee',
-                'Modify/Delete Employee',
-                'Reporting To',
                 'Main Menu'
             ]
         }
@@ -133,12 +119,6 @@ const employeeMenu = () => {
             break;
             case 'Add New Employee':
                 addNew('employee');
-            break
-            case 'Modify/Delete Employee':
-                modDel('employee');
-            break;
-            case 'Reporting To':
-                reportsTo();
             break;
             default:
                 mainMenu();
@@ -221,14 +201,11 @@ const addNew = (identifier) => {
         })
     }
     else {
-        connection.query(`SELECT * FROM role WHERE title = 'manager'`, (err, managers) => {
+        connection.query(`SELECT * FROM role`, (err, roles) => {
             if (err) throw err;
-            connection.query(`SELECT * FROM role`, (err, roles) => {
-                if (err) throw err;
+
                 const roleChoices = roles.map((role) => role.title);
-                roleChoices.push('Create new');
-                const managerChoices = managers.map((manager) => manager.name);
-                managerChoices.push('Create new');
+                roleChoices.push('Create new');console.log('roleChoices',roleChoices);
                 inquirer.prompt([
                     {
                         message: 'First name of employee to add:',
@@ -243,34 +220,22 @@ const addNew = (identifier) => {
                         message: 'Select a role',
                         name: 'role',
                         choices: roleChoices
-                    },
-                    {
-                        type: 'list',
-                        message: 'Select a manager:',
-                        name: 'manager',
-                        choices: managerChoices
                     }
                 ]).then((response) => {
-                    let managerId, roleId;
-                    // roles.forEach(role => {
-                    //     if (role.title === role.manager) {
-                    //         roleId = role.id;
-                    //     }
-                    // });
-                    // managers.forEach(manager => {
-                    //     if (manager.name === response.manager) {
-                    //         managerId = manager.id;
-                    //     }
-                    // });
-                    if (response.role === 'Create new' || response.manager === 'Create new') {
+                    if (response.role === 'Create new') {
                         addNew('role');
                     }
+                    let roleId;
+                    roles.forEach(role => {
+                        if (role.title === response.role) {
+                            roleId = role.id;
+                        }
+                    });console.log('-------',identifier,roleId);
                     connection.query(`INSERT INTO ${identifier} SET ?`,
                     {
                         first_name: response.first_name,
                         last_name: response.last_name,
-                        // role: roleId,
-                        // manager: managerId
+                        role_id: roleId,
                     },
                     (err) => {
                         if (err) throw err;
@@ -278,24 +243,9 @@ const addNew = (identifier) => {
                         viewAll(identifier);
                     });
                 });
-            });
+
         });
     }
-}
-
-const modDel = (identifier) => {
-    console.log('called modDel with',identifier);
-    mainMenu();
-}
-
-const directReports = () => {
-    console.log('called directReports');
-    mainMenu();
-}
-
-const reportsTo = () => {
-    console.log('called reportsTo');
-    mainMenu();
 }
 
 const exit = () => {
